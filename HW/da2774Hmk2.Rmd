@@ -22,17 +22,41 @@ library(scales)
 [5 points]
 
 Do not use *grid.arrange()* for this exercise. Rather, use *gather()* to tidy the data and then facet on window number.  To make the comparison, use relative frequency bar charts (the heights of the bars in each facet sum to one).  Describe how the distributions differ.
+```{r}
+library(gridExtra)
+```
+
+```{r}
+d1 <- ggplot(vlt, aes(window1)) +
+  geom_bar()
+d2 <- ggplot(vlt, aes(window2)) +
+  geom_bar()
+d3 <- ggplot(vlt, aes(window3)) +
+  geom_bar()
+
+grid.arrange(d1, d2, d3)
+```
+
+```{r}
+# head(DAAG::vlt)
+dataf <- data.frame(DAAG::vlt)
+
+d <- gather(dataf, key="windows", value="symbols", window1:window3) 
+
+d
+```
+
 
 ```{r}
 
 dataf <- data.frame(DAAG::vlt)
 
-dataf <- gather(DAAG::vlt, key="window", value="symbol", window1:window3) 
+d <- gather(dataf, key="windows", value="symbols", window1:window3) 
 
-ggplot(dataf) + 
-  geom_bar(aes(x=symbol, y=..prop.., group=window)) +
+ggplot(d) + 
+  geom_bar(aes(x=symbols, y=..prop.., group=windows)) +
   
- facet_wrap(~window)
+  facet_wrap(~windows)
 ```
 
 
@@ -53,7 +77,7 @@ ggplot(dataf) +
 This data comes from the "Detailed Mortality" database available on https://wonder.cdc.gov/
 
 ```{r}
-df = read.csv("/Users/daargov/OneDrive/Documents/Graduate School/Spring 2018/Visualizations/Death2015.txt", sep="\t")
+df = read.csv("../Data/Death2015.txt", sep="\t")
 ```
 ```{r}
 head(df)
@@ -70,6 +94,11 @@ Code for all preprocessing must be shown. (That is, don't open in the file in Ex
 (a) For `Place of Death`, `Ten-Year Age Groups`, and `ICD Chapter Code` variables, do the following:
 
 Identify the type of variable (nominal, ordinal, or discrete) and draw a horizontal bar chart using best practices for order of categories.
+
+```{r}
+
+```
+
 
 (b) Create horizontal bar charts for the ICD sub-chapter codes, one plot per ICD chapter code, by faceting on chapter code, *not* by using *grid.arrange()*.  Use `scales = "free"` with `facet_wrap()`. It should look like this (with data, of course!). Describe notable features.
 
