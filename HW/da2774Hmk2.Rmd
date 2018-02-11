@@ -124,7 +124,7 @@ grid.arrange(dtype1+death1.title, dtype2+death2.title, dtype3+death3.title)
 (b) Create horizontal bar charts for the ICD sub-chapter codes, one plot per ICD chapter code, by faceting on chapter code, *not* by using *grid.arrange()*.  Use `scales = "free"` with `facet_wrap()`. It should look like this (with data, of course!). Describe notable features.
 
 
-
+some of the death types have many more sub types of death, while some only have one or a few. The data appears to be very evenly spread out, where there is no notable trend. What may be causing us to believe this is that some death code types have sufficient data, while others do not.
 
 ```{r, fig.width=12, fig.height=20}
 ggplot(deathf) +
@@ -139,9 +139,44 @@ ggplot(deathf) +
 
 (c) Change the `scales` parameter to `scales = "free_y"`. What changed?  What information does this set of graphs provide that wasn't available in part (b)?
 
+we can now see that some of the code types have many more sub codes for cause. we can also see where there is lacking data, such as U00-U99
+
+```{r, fig.height=20, fig.width=15}
+ggplot(deathf) +
+  geom_bar(aes(ICD.Sub.Chapter.Code)) +
+  facet_wrap(~ICD.Chapter.Code, ncol=3, scales = "free_y") + 
+  coord_flip()
+```
+
+
 (d) Redraw the panels as *relative frequency* bar charts rather than *count* bar charts. (The lengths of the bars *in each panel separately* must sum to 1.) What new information do you gain?
 
+Now that the y values are relative frequencies, we can clearly see how the data is not evenly provided for Chapter Code to Sub Chapter Code. 
+
+```{r, fig.width=15, fig.height=20}
+ggplot(deathf) +
+  geom_bar(aes(x=ICD.Sub.Chapter.Code, y=..prop.., group=ICD.Chapter.Code)) +
+  facet_wrap(~ICD.Chapter.Code, ncol=3, scales = "free_y") +
+  coord_flip()
+
+```
+
+
 (e) Choose one of the small panels and redraw it as a single graph, using names rather than codes. (That is, use `ICD Chapter` and `ICD Sub-Chapter` instead of the code versions.)  What type of data is this? Note any interesting features.
+
+I broke out the nominal data within the Death Chapter "Diseases of the respiratory system." The spread of cause of sub chapter breakout is quite uniform. What is surprising though is the number of "other" diseases called out. It would be interesting to see sub sections of the sub chapters
+
+```{r}
+data = subset(deathf, ICD.Chapter.Code %in% c("J00-J98"))
+
+ggplot(data) +
+  geom_bar(aes(x=ICD.Sub.Chapter)) +
+  xlab("Diseases of the respiratory system") +
+  ylab("Death Count") +
+  coord_flip()
+
+```
+
 
 #### 3. Detailed Mortality, questions about the data
 
@@ -151,13 +186,41 @@ Cite your sources with links.
 
 (a) Who is included in the death counts?
 
+
+site: (https://wonder.cdc.gov/controller/datarequest/D76)
+
+Data is of:
+
+U.S. civilians, Female and Male
+Noninstitutionalized population
+and the Age ranges from <1 - 85+
+
+
 (b) When was this query processed?  (Hint: it's in the file itself; don't provide the file time stamp.)
+
+if scrolling down to the bottom of the txt file, it's "Query Date: Feb 5, 2018 5:08:43 PM"
+Also, I found the Notes unique column 
+```{r}
+factor(unique(deathf$Notes))[24]
+
+```
+
 
 (c) What does "ICD" stand for? Which version is used for this particular dataset? Name five other countries that use the ICD for official mortality data.
 
+"ICD" is an acronym for "International Classification Of Diseases". (inside the data)
+This version is Underlying Cause of Death 1999-2016, specifically 2015, for all states in U.S. (inside the data)
+Belgium, Denmark, Canada, China, France. (https://www.cdc.gov/globalhealth/countries/default.htm)
+
 (d) Which U.S. organizations collects mortality data? Where is the headquarters located?
 
+NCHS Organization (https://www.cdc.gov/nchs/about/index.htm)
+Headquarters	Hyattsville, MD (https://en.wikipedia.org/wiki/National_Center_for_Health_Statistics)
+
 (e) In brief, how is the data collected?  What is the estimated accuracy rate, according to the dataset documentation?
+
+Data is collected via surveys, personal interviews in households, by phone, from other agencies and private partners. (wikipedia and https://www.cdc.gov/nchs/data/factsheets/factsheet_health_statistics.htm)
+The NCHS mainly goes over their data gathering process. they do not mention the estimated accuracy rate. Accuracy is at a global level of satisfaction, but it is not explicitely mentioned. (https://www.cdc.gov/nchs/data/factsheets/factsheet_nhis.htm)
 
 ### Chapter 5
 
