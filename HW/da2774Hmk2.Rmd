@@ -248,11 +248,29 @@ ggplot(dataf, aes(x=length, y=year))+
 
 (b) Points with alpha blending + density estimate contour lines
 
+```{r}
+ggplot(dataf, aes(x=length, y=year))+
+  geom_point(alpha=.1)+
+  geom_density2d(bins=22)
+```
+
+
 (c) Hexagonal heatmap of bin counts
+
+```{r}
+ggplot(dataf, aes(x=length, y=year))+
+  geom_hex(bin=10)
+```
+
 
 (d) Square heatmap of bin counts 
 
 For all, adjust parameters to the levels that provide the best views of the data.
+
+```{r}
+
+```
+
 
 (e) Describe noteworthy features of the data, using the movie ratings example on page 82 (last page of Section 5.3) as a guide.  
 
