@@ -234,6 +234,18 @@ Draw four scatterplots of *length* vs. *year* from the with the following variat
 
 (a) Points with alpha blending
 
+```{r}
+# install.packages("ggplot2movies")
+# library(ggplot2movies)
+
+dataf <- subset(ggplot2movies::movies, length < 200)
+
+ggplot(dataf, aes(x=length, y=year))+
+  geom_point(alpha=.1)
+
+```
+
+
 (b) Points with alpha blending + density estimate contour lines
 
 (c) Hexagonal heatmap of bin counts
