@@ -265,17 +265,69 @@ ggplot(dataf, aes(x=length, y=year))+
 
 (d) Square heatmap of bin counts 
 
-For all, adjust parameters to the levels that provide the best views of the data.
-
 ```{r}
-
+ggplot(dataf, aes(length, year, fill=length)) +
+  geom_bin2d() +
+  coord_equal()
+  
 ```
 
 
+For all, adjust parameters to the levels that provide the best views of the data.
+
 (e) Describe noteworthy features of the data, using the movie ratings example on page 82 (last page of Section 5.3) as a guide.  
 
+1. there is no data for movies made before 1890
+2. 1950 saw a trend where movies branched off to either be less than 25 minutes or between 50-125 minutes in length
+3. around the 1980 time movies tended to be longer in time and the shorter time type movie decreased in frequency, until resurging back in popularity at around 1990-2000
+4. there is a hole in the data where very few films are length ~20-50
+5. all films were very short in length until around 1915
+
 (f) How do (a)-(d) compare? Are there features that you can see in some but not all of the graphs?
+
+1. clearly the contour lines using geom_density add clarity to the true nature of the frequency between graphs a and b. 
+2. the geom_hex graph also clearly shows the frequency/count, and even more closely, as it adds in color concentration to make it more evident
+3. the geom_tile in d makes it nice to see how many movies of a certain length merge together, since the square nature of the tiles can also help to show frequency, to some degree
+
 
 #### 2. Leaves (Chapter 5 exercises, #7, p. 96)
 
 [6 points]
+
+```{r}
+DAAG::leafshape
+
+```
+
+
+```{r}
+dataf <- data.frame(DAAG::leafshape)
+
+head(dataf)
+
+# library(lattice)
+
+splom(dataf[1:3],dataf, main = "Leaf length, width and petiole, in mm")
+splom(dataf[5:7], dataf, main = "Log of leaf length, width and petiole, in mm")
+
+
+```
+
+It's more useful to use the log data because it is more centered in the graphs which allows us to view the patterns and shape more clearly
+
+```{r}
+
+arch <- as.factor(dataf[,8])
+
+
+splom(dataf[1:3],dataf, main = "Leaf length, width and petiole, in mm", col=factor(arch), key=list(col=c("Red","Black"), text=list(c("Orthotropic", "Plagiotropic"))))
+splom(dataf[5:7], dataf, main = "Log of leaf length, width and petiole, in mm",col=factor(arch), key=list(col=c("Red","Black"), text=list(c("Orthotropic", "Plagiotropic"))))
+
+
+
+
+```
+
+1. 
+
+
