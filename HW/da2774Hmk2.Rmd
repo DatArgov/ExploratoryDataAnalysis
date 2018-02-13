@@ -328,6 +328,8 @@ splom(dataf[5:7], dataf, main = "Log of leaf length, width and petiole, in mm",c
 
 ```
 
-1. 
+1. We can now see that there are two arch types, Orthotropic and Plagiotropic
+2. It also looks like Orthotropic leftypes are longer and wider
+3. there are more outliers with the Orthotropic leaves, it appears
 
 
