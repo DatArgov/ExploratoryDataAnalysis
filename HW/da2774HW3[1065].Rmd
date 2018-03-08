@@ -1,0 +1,115 @@
+---
+title: "da2774HW3"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, eval = FALSE)
+
+# install.packages("GGally")
+# install.packages("plotly")
+# install.packages("vcd")
+install.packages("tidyquant")
+library(GGally)
+library(tidyr)
+library(plotly)
+library(plyr)
+library(dplyr) 
+library(MASS)
+library(vcd)
+library(tidyquant)
+```
+
+**$1.$ Parallel Coordinates**
+
+$(a)$ Draw a parallel coordinates plot of the data in "ManhattanCDResults.csv" in the data folder on CourseWorks. (Original data source and additional information about the data can be found here:  https://cbcny.org/research/nyc-resident-feedback-survey-community-district-results). Your plot should have one line for each of the twelve Manhattan community districts in the dataset. 
+
+```{r fig.height=20, fig.width=12}
+df <- read.csv('../data/ManhattanCDResults.csv')
+
+df2<-df
+df[3:14] <- lapply(df[3:14], function(x) as.numeric(sub("%", "", x)))
+df3 <- gather(df, key="district", value="value", cd1:cd12)
+df3 <- df3[c(3,1,4)]
+
+
+df3 <- spread(df3, key=Indicator, value=value)
+
+ggparcoord(df3, 
+           columns = c(2:46), 
+           groupColumn = "district", 
+           scale = "globalminmax", 
+           alphaLines = .7) + 
+  coord_flip() + 
+  xlab("Indicators") + 
+  ylab("Approval")
+
+```
+
+
+
+$(b)$ Do there appear to be greater differences across *indicators* or across *community districts*? (In other words, are Manhattan community districts more alike or more different in how their citizens express their satisfaction with city life? 
+
+Districts seem to follow the trend of indicators, so it appears that community districts are more alike with their satisfaction with city life in accordance with indicator
+
+
+$(c)$ Which indicators have wide distributions (great variety) in responses?
+
+Availability of healthcare services, availability of cultural activities, neighborhood playgrounds, neighborhood parks, neighborhood as a place to live, all appear to be rather dispersed in terms of approval
+
+$(d)$ Does there appear to be a correlation between districts and overall satisfaction?  In order words, do some districts report high satisfaction on many indicators and some report low satisfaction on many indicators or are the results more mixed? (Hint: a different color for each community district helps identify these trends). 
+
+overall yes, there appears to be coorelation. districts such as cd11 tend to always be on the lower end of approval while districts such as cd7 tend to consistantly have higher approval
+
+
+**$2.$ Mosaic Plots**
+
+Using the "Death2015.txt" data from the previous assignment, create a mosaic plot to identify whether `Age` is associated with `Place of Death`. Include only the top four `Age` categories. Treat `Age` as the independent variable and `Place of Death` as the dependent variable. (Hint: the dependent variable should be the last cut and it should be horizontal.) The labeling should be clear enough to identify what's what, that is, "good enough," not perfect. Do the variables appear to be associated? Describe briefly.
+
+- Age and Place of Death seem to have a slight association. Not very strong, but there are some trends
+- Nursing home, for instance is highest for the oldest age group
+- Decendent's home seems to increase with an increase in age
+- Dead on arrival looks to be highest with the youngest group and then starts to diminish
+
+```{r fig.width=20, fig.height=12}
+dfdeath <- read.csv('../Data/Death2015.txt', sep= '\t')
+ages = c("1", "1-4", "5-14", "15-24")
+death <- subset(dfdeath, Ten.Year.Age.Groups.Code %in% ages)
+death$Ten.Year.Age.Groups.Code <- factor(death$Ten.Year.Age.Groups.Code, levels=ages)
+labels = list(gp_labels = gpar(fontsize = 12, fontface = 3))
+mosaic(Place.of.Death~Ten.Year.Age.Groups.Code, death, keep_aspect_ratio=FALSE, labeling_args = labels)
+
+
+```
+
+
+
+**$3.$ Time Series**
+
+$(a)$ Use the `tidyquant` package to collect stock information on four stocks of your choosing.  Create a line chart showing the closing price of the four stocks on the same graph, employing a different color for each stock.
+
+```{r}
+# install.packages("tidyquant")
+time <- today() - years(1)
+tickers <- c("FORD", "TSLA", "TM", "KRX")
+stock_prices <-  tq_get(tickers, get="stock.prices", from = time)
+close.prices <- spread(stock_prices, key=symbol, value=close)
+ggplot(stock.prices, aes(date, close, color=symbol)) +
+    geom_line()
+```
+
+
+$(b)$ Transform the data so each stock begins at 100 and replot. Do you learn anything new that wasn't visible in part (a)?
+
+
+**$4.$ Missing Data**
+
+For this question, explore the New York State Feb 2017 snow accumulation dataset available in the data folder on CourseWorks: "NY-snowfall-201702.csv". The original data source is here: https://www.ncdc.noaa.gov/snow-and-ice/daily-snow/
+
+$(a)$ Show missing patterns graphically.
+
+$(b)$ Is the percent of missing values consistent across days of the month, or is there variety? 
+
+$(c)$ Is the percent of missing values consistent across collection stations, or is there variety?
+
+$(d)$ Is the daily average snowfall correlated with the daily missing values percent?  On the basis of these results, what is your assessment of the reliability of the data to capture true snowfall patterns? In other words, based on what you've discovered, do you think that the missing data is highly problematic, or not?
