@@ -18,6 +18,7 @@ library(dplyr)
 library(MASS)
 library(vcd)
 library(tidyquant)
+
 ```
 
 **$1.$ Parallel Coordinates**
@@ -25,17 +26,17 @@ library(tidyquant)
 $(a)$ Draw a parallel coordinates plot of the data in "ManhattanCDResults.csv" in the data folder on CourseWorks. (Original data source and additional information about the data can be found here:  https://cbcny.org/research/nyc-resident-feedback-survey-community-district-results). Your plot should have one line for each of the twelve Manhattan community districts in the dataset. 
 
 ```{r fig.height=20, fig.width=12}
-df <- read.csv('../data/ManhattanCDResults.csv')
 
-df2<-df
-df[3:14] <- lapply(df[3:14], function(x) as.numeric(sub("%", "", x)))
-df3 <- gather(df, key="district", value="value", cd1:cd12)
-df3 <- df3[c(3,1,4)]
-
-
-df3 <- spread(df3, key=Indicator, value=value)
-
-ggparcoord(df3, 
+# install.packages("tidyr")
+# install.packages("ggplot2")
+# library(ggplot2)
+# library(tidyr)
+cd <- read.csv('../data/ManhattanCDResults.csv')
+cd[3:14] <- lapply(cd[3:14], function(x) as.numeric(sub("%", "", x)))
+cd <- gather(cd, key="district", value="value", cd1:cd12)
+cd <- cd[c(3,1,4)]
+cd <- spread(cd, key=Indicator, value=value)
+ggparcoord(cd, 
            columns = c(2:46), 
            groupColumn = "district", 
            scale = "globalminmax", 
