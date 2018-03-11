@@ -95,22 +95,143 @@ time <- today() - years(1)
 tickers <- c("FORD", "TSLA", "TM", "KRX")
 stock_prices <-  tq_get(tickers, get="stock.prices", from = time)
 close.prices <- spread(stock_prices, key=symbol, value=close)
-ggplot(stock.prices, aes(date, close, color=symbol)) +
+ggplot(stock_prices, aes(date, close, color=symbol)) +
     geom_line()
 ```
 
 
 $(b)$ Transform the data so each stock begins at 100 and replot. Do you learn anything new that wasn't visible in part (a)?
 
+```{r}
+
+```
+
+
 
 **$4.$ Missing Data**
 
 For this question, explore the New York State Feb 2017 snow accumulation dataset available in the data folder on CourseWorks: "NY-snowfall-201702.csv". The original data source is here: https://www.ncdc.noaa.gov/snow-and-ice/daily-snow/
 
+```{r fig.width=15, fig.height=35}
+snow.url <- "https://www.ncdc.noaa.gov/snow-and-ice/daily-snow/NY-snowfall-201802.csv"
+main.snow <- data.frame(read.csv(snow.url, skip=1))
+snow <- as.matrix(main.snow)
+snow[snow == "T"] <- 0.01
+snow[snow == "M"] <- NA
+snow <- as.data.frame(snow)
+rownames(snow) <- snow$Station.Name
+
+tidysnow <- snow %>%
+  rownames_to_column("id") %>%
+  gather(key, value, -id) %>%
+  mutate(missing = ifelse(is.na(value), "yes", "no"))
+
+preserve.key.order <- function(){
+  ordered.keys <- list()
+  for(i in unique(tidysnow$key)){
+    ordered.keys <- append(ordered.keys, i)
+  }
+  return(ordered.keys)
+}
+tidysnow$key <- factor(tidysnow$key, levels=preserve.key.order())
+ggplot(tidysnow, aes(x = key, y = fct_rev(id), fill = missing)) +
+  geom_tile(color = "white") +
+  theme(axis.text.x = element_text(size=20,angle=90),
+        axis.text.y = element_text(size=20),  
+        axis.title.x = element_text(size=40),
+        axis.title.y = element_text(size=40,angle=90)) +
+  xlab("") + 
+  ylab("")
+```
+
+
 $(a)$ Show missing patterns graphically.
 
 $(b)$ Is the percent of missing values consistent across days of the month, or is there variety? 
 
+There doesnt appear to be any pattern across independent values such as days of month. 
+
 $(c)$ Is the percent of missing values consistent across collection stations, or is there variety?
 
+per below, we can see that there are clusters of missing data pockets, but that may be due to the frequency of data collected, such as in NYC and long island. So there does appear to be variety of missing data, but inconsistently 
+
+```{r}
+snow.url <- "https://www.ncdc.noaa.gov/snow-and-ice/daily-snow/NY-snowfall-201802.csv"
+snow <- data.frame(read.csv(snow.url, skip=1))
+snow$na.count <- apply(snow, 1, function(x) sum(x=='M'))
+ggplot(snow, aes(x = Longitude, y = Latitude)) +
+  geom_point(aes(colour = na.count), alpha=.7) + 
+  scale_colour_gradient(low = "grey", high = "red") + 
+  ggtitle("Missing Data by County")
+```
+
+
 $(d)$ Is the daily average snowfall correlated with the daily missing values percent?  On the basis of these results, what is your assessment of the reliability of the data to capture true snowfall patterns? In other words, based on what you've discovered, do you think that the missing data is highly problematic, or not?
+
+-the missing data is hugely problematic is representing the true nature of snowfall
+-by showing both na_totals and daily average, we can see that there is a very weak correlation, which is logical since with tons of snow the total_na would be lower
+-the main point is, there does not seem to be a trend bewtween average snowfall and missing values
+
+```{r}
+snow.url <- "https://www.ncdc.noaa.gov/snow-and-ice/daily-snow/NY-snowfall-201802.csv"
+main.snow <- data.frame(read.csv(snow.url, skip=1))
+snow <- as.matrix(main.snow)
+snow[snow == "T"] <- 0.01
+snow[snow == "M"] <- NA
+snow <- as.data.frame(snow)
+
+get.na_avg <- function(){
+  dates <- c(
+    "Feb.1","Feb.2","Feb.3","Feb.4","Feb.5","Feb.6","Feb.7","Feb.8","Feb.9","Feb.10",
+    "Feb.11","Feb.12","Feb.13","Feb.14","Feb.15","Feb.16","Feb.17","Feb.18","Feb.19",
+    "Feb.20","Feb.21","Feb.22","Feb.23","Feb.24","Feb.25","Feb.26","Feb.27","Feb.28"
+    )
+  na_total <- list()
+  average <- list()
+  date_list <- list()
+  for(date in dates){
+    na_total <- append(na_total, as.numeric(sum(is.na(snow[[date]]))))
+    average <- append(average, mean(as.numeric(snow[[date]]), na.rm = TRUE))
+    date_list <- append(date_list, date)
+  }
+  temp_df <- do.call(rbind.data.frame, Map('c', date_list, na_total, average))
+  colnames(temp_df) <- c('date', 'na_total', 'average')
+  # set up the data frame
+  temp_df$date <- factor(temp_df$date, levels=dates)
+  temp_df$na_total <- as.numeric(as.character(temp_df$na_total))
+  temp_df$average <- as.numeric(as.character(temp_df$average))
+  return(temp_df)
+}
+na_avg <- get.na_avg()
+
+cor(na_avg$na_total, na_avg$average)
+
+ggplot(na_avg, aes(na_total, average)) +
+  geom_point() +
+  geom_smooth()
+
+ggplot(na_avg) + 
+  geom_line(aes(date, na_total, color="na_total", group = 1)) + 
+  geom_line(aes(date, average, color="average", group = 1)) +
+  ggtitle("NA Total and Average Snow Fall For February")
+
+normalize2 <- function(col){
+  index.value <- na_avg[[col]][1]/10
+  ans <- list()
+  for(i in na_avg[[col]]){
+    ans <- append(ans, (i/index.value))
+  }
+  temp_df <- data.frame(col=unlist(ans))
+  colnames(temp_df) <- c(col)
+  return(temp_df)
+}
+na_avg$na_total <- normalize2('na_total')$na_total
+na_avg$average <- normalize2('average')$average
+
+
+ggplot(na_avg) + 
+  geom_line(aes(date, na_total, color="na_total", group = 1)) + 
+  geom_line(aes(date, average, color="average", group = 1)) +
+  ggtitle("NA Total and Average Snow Fall For February (Normalized)")
+```
+
