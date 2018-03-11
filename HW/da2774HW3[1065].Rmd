@@ -95,6 +95,7 @@ time <- today() - years(1)
 tickers <- c("FORD", "TSLA", "TM", "KRX")
 stock_prices <-  tq_get(tickers, get="stock.prices", from = time)
 close.prices <- spread(stock_prices, key=symbol, value=close)
+close.prices
 ggplot(stock_prices, aes(date, close, color=symbol)) +
     geom_line()
 ```
@@ -102,7 +103,13 @@ ggplot(stock_prices, aes(date, close, color=symbol)) +
 
 $(b)$ Transform the data so each stock begins at 100 and replot. Do you learn anything new that wasn't visible in part (a)?
 
+when rescaling to 100 one can see that the volatility to very similar, while before scaling it appeared that Ford's value was less volatile than Tesla's. 
+
 ```{r}
+
+
+
+# dat <- data.frame(lapply(stock_prices, function(stock_prices) scale(stock_prices, center = FALSE, scale = max(stock_prices, na.rm = TRUE)/100)))
 
 ```
 
