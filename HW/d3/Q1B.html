@@ -1,0 +1,59 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Q1 Part B</title>
+    <script src="https://d3js.org/d3.v4.min.js">  </script>
+
+  </head>
+  <body>
+    <script type="text/javascript">
+      var w = 500;
+      var h = 300;
+      var margin = {top: 25, right: 25, bottom: 25, left: 25};
+      var innerHeight = h - margin.top - margin.bottom;
+      var innerWidth = w - margin.left - margin.right;
+      var dataset = [{letter: "A", amount: 34},
+                     {letter: "B", amount: 45},
+                     {letter: "C", amount: 14}];
+     // Don't change anything above this line.
+      var yScale = d3.scalePoint()
+          .domain(dataset.map(function(d){return d.letter}))
+         .range([innerHeight, 0])
+         .padding(.5);
+      var xScale = d3.scaleLinear()
+          .domain([0,d3.max(dataset, function(d){
+              return d.amount;
+          })])
+          .range([0, innerWidth]);
+      var xAxis = d3.axisBottom()
+                    .scale(xScale)
+                    .ticks(10);
+      // console.log(yScale.domain());
+      var yAxis = d3.axisLeft()
+                    .scale(yScale);
+      // create the svg
+      var svg = d3.select("body")
+          .append("svg")
+          .attr("width", w)
+          .attr("height", h);
+      svg.selectAll("circle")
+          .data(dataset)
+          .enter()
+          .append("circle")
+            //   .attr("cx", d => xScale(d.amount) + margin.left)
+          .attr("cx", function(d) {return xScale(d.amount) + margin.left})
+             //   .attr("cy", d => yScale(d.letter) + margin.bottom)
+          .attr("cy", function(d) {return yScale(d.letter) + margin.bottom})
+             
+          .attr("r", 5);
+      svg.append("g")
+          .attr("class", "xAxis")
+          .attr("transform", "translate(" + margin.left + "," + (h - margin.bottom) + ")")
+          .call(xAxis);
+      svg.append("g")
+          .attr("class", "yAxis")
+          .attr("transform", "translate(" + margin.top + "," + margin.bottom + ")")
+          .call(yAxis);
+    </script>
+  </body>
+</html>
